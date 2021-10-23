@@ -7,6 +7,11 @@ namespace StatusAppBackend.Database
     {
         public DbSet<Service> Services { get; set; }
 
+        public StatusAppContext(DbContextOptions<StatusAppContext> options) : base(options)
+        {
+
+        }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Service model creation

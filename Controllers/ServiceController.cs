@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StatusAppBackend.Controllers.DTOs;
@@ -28,6 +29,18 @@ namespace StatusAppBackend.Controllers
         public ActionResult<IEnumerable<ServiceDTO>> GetServices()
         {
             return Ok(this._servicesService.GetServices());
+        }
+
+        /// <summary>
+        /// Get service information for registered services
+        /// </summary>
+        /// <returns>A list with current status information about the services</returns>
+        /// <response code="200">Returns a list with status information for all registred services</response>
+        [HttpGet("information")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<ServiceInformationDTO>>> GetServiceInformation()
+        {
+            return Ok(await this._servicesService.GetServiceInformationAsync());
         }
     }
 }

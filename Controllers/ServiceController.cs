@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ExceptionMiddleware.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StatusAppBackend.Controllers.DTOs;
@@ -41,6 +43,20 @@ namespace StatusAppBackend.Controllers
         public async Task<ActionResult<IEnumerable<ServiceInformationDTO>>> GetServiceInformation()
         {
             return Ok(await this._servicesService.GetServiceInformationAsync());
+        }
+
+        /// <summary>
+        /// Get service information for given service
+        /// </summary>
+        /// <returns>Status information about the given service</returns>
+        /// <response code="200">Status information for the service with the given id</response>
+        /// <response code="404">An error response object for the service that could not be found</response>
+        [HttpGet("information/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ServiceInformationDTO>> GetServiceInformation([FromRoute] int id)
+        {
+            return Ok(await this._servicesService.GetServiceInformationAsync(id));
         }
     }
 }

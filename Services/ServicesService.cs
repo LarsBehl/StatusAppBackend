@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ExceptionMiddleware.Exceptions;
 using StatusAppBackend.Controllers.DTOs;
 using StatusAppBackend.Database;
 using StatusAppBackend.Database.Model;
@@ -31,6 +32,15 @@ namespace StatusAppBackend.Services
                 serviceInformationTasks.Add(GetServiceInformationAsync(service));
             
             return await Task.WhenAll(serviceInformationTasks);
+        }
+
+        public async Task<ServiceInformationDTO> GetServiceInformationAsync(int id)
+        {
+            Service service = this._dbContext.Services.SingleOrDefault(s => s.Key == id);
+            if(service is null)
+                throw new NotFoundException($"Service with id {id} not found");
+            
+            return await GetServiceInformationAsync(service);
         }
 
         public IEnumerable<ServiceDTO> GetServices() => this._dbContext.Services.ToList().ConvertAll<ServiceDTO>(x => new ServiceDTO(x));

@@ -44,6 +44,20 @@ namespace StatusAppBackend.Services
 
         public IEnumerable<ServiceDTO> GetServices() => this._dbContext.Services.ToList().ConvertAll<ServiceDTO>(x => new ServiceDTO(x));
 
+        public async Task<TimeSeriesDTO> GetServiceTimeSeriesAsync(int id)
+        {
+            Service service = await this._dbContext.Services.SingleOrDefaultAsync(s => s.Key == id);
+            if(service is null)
+                throw new NotFoundException($"Service with id {id} not found");
+
+            return new TimeSeriesDTO(
+                service,
+                await this._dbContext.ServiceInformations.Where(s => s.ServiceKey == id)
+                                                         .OrderBy(s => s.TimeRequested)
+                                                         .ToListAsync()
+            );
+        }
+
         private async Task<ServiceInformation> GetServiceInformationFromDbAsync(int id)
         {
             return await this._dbContext.ServiceInformations.Where(s => s.ServiceKey == id)

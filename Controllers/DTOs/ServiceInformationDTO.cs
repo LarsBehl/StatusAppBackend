@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using StatusAppBackend.Database.Model;
 
@@ -9,13 +10,15 @@ namespace StatusAppBackend.Controllers.DTOs
         public int Id { get; set; }
         public double ResponseTime { get; set; }
         public HttpStatusCode StatusCode { get; set; }
+        public DateTime RequestedAt { get; set; }
 
-        public ServiceInformationDTO(Service service, double responseTime, HttpStatusCode statusCode)
+        public ServiceInformationDTO(ServiceInformation serviceInformation)
         {
-            this.Id = service.Key;
-            this.Name = service.Name;
-            this.ResponseTime = responseTime;
-            this.StatusCode = statusCode;
+            this.Name = serviceInformation.Service.Name;
+            this.Id = serviceInformation.ServiceKey;
+            this.ResponseTime = serviceInformation.ResponseTime;
+            this.StatusCode = (HttpStatusCode) serviceInformation.StatusCode;
+            this.RequestedAt = serviceInformation.TimeRequested;
         }
     }
 }

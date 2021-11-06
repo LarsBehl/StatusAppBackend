@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ExceptionMiddleware.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using StatusAppBackend.Controllers.DTOs;
 using StatusAppBackend.Database;
 using StatusAppBackend.Database.Model;
@@ -25,43 +25,31 @@ namespace StatusAppBackend.Services
 
         public async Task<IEnumerable<ServiceInformationDTO>> GetServiceInformationAsync()
         {
-            List<Service> services = this._dbContext.Services.ToList();
-            List<Task<ServiceInformationDTO>> serviceInformationTasks = new List<Task<ServiceInformationDTO>>();
+            List<ServiceInformation> serviceInformations = new List<ServiceInformation>();
+            List<Service> services = await this._dbContext.Services.ToListAsync();
+            foreach (Service service in services)
+                serviceInformations.Add(await this.GetServiceInformationFromDbAsync(service.Key));
 
-            foreach(Service service in services)
-                serviceInformationTasks.Add(GetServiceInformationAsync(service));
-            
-            return await Task.WhenAll(serviceInformationTasks);
+            return serviceInformations.ConvertAll(s => new ServiceInformationDTO(s));
         }
 
         public async Task<ServiceInformationDTO> GetServiceInformationAsync(int id)
         {
-            Service service = this._dbContext.Services.SingleOrDefault(s => s.Key == id);
-            if(service is null)
+            ServiceInformation service = await this.GetServiceInformationFromDbAsync(id);
+            if (service is null)
                 throw new NotFoundException($"Service with id {id} not found");
-            
-            return await GetServiceInformationAsync(service);
+
+            return new ServiceInformationDTO(service);
         }
 
         public IEnumerable<ServiceDTO> GetServices() => this._dbContext.Services.ToList().ConvertAll<ServiceDTO>(x => new ServiceDTO(x));
 
-        private async Task<ServiceInformationDTO> GetServiceInformationAsync(Service service)
+        private async Task<ServiceInformation> GetServiceInformationFromDbAsync(int id)
         {
-            HttpStatusCode httpStatusCode;
-            DateTime startTime = DateTime.Now;
-            try
-            {
-                httpStatusCode = (await this._httpClient.GetAsync(service.Url)).StatusCode;
-
-            }
-            catch(Exception)
-            {
-                httpStatusCode = HttpStatusCode.ServiceUnavailable;
-            }
-            TimeSpan elapsedTime = DateTime.Now - startTime;
-
-
-            return new ServiceInformationDTO(service, elapsedTime.TotalMilliseconds, httpStatusCode);
+            return await this._dbContext.ServiceInformations.Where(s => s.ServiceKey == id)
+                                                            .OrderByDescending(s => s.TimeRequested)
+                                                            .Include(s => s.Service)
+                                                            .FirstOrDefaultAsync();
         }
     }
 }

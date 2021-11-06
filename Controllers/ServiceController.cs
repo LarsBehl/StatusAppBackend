@@ -58,5 +58,19 @@ namespace StatusAppBackend.Controllers
         {
             return Ok(await this._servicesService.GetServiceInformationAsync(id));
         }
+
+        /// <summary>
+        /// Get a time series for a given service
+        /// </summary>
+        /// <returns>Time series of status information about a given service</returns>
+        /// <response code="200">Time series of status information of the given service</response>
+        /// <response code="404">An error response object for the service thath could not be found</response>
+        [HttpGet("information/{id}/timeseries")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TimeSeriesDTO>> GetSerivceInformationTimeSeries([FromRoute] int id)
+        {
+            return Ok(await this._servicesService.GetServiceTimeSeriesAsync(id));
+        }
     }
 }

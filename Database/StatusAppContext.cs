@@ -1,3 +1,6 @@
+using System;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using StatusAppBackend.Database.Model;
 
@@ -29,9 +32,45 @@ namespace StatusAppBackend.Database
             builder.Entity<ServiceInformation>().Property(x => x.TimeRequested).IsRequired();
             builder.Entity<ServiceInformation>().HasOne(x => x.Service).WithMany().HasForeignKey(x => x.ServiceKey);
 
+            // User model creation
+            builder.Entity<User>().HasKey(x => x.Id);
+            builder.Entity<User>().Property(x => x.Id).IsRequired();
+            builder.Entity<User>().Property(x => x.Username).IsRequired();
+            builder.Entity<User>().Property(x => x.Hash).IsRequired();
+            builder.Entity<User>().Property(x => x.Salt).IsRequired();
+
+            // UserCreationToken model creation
+            builder.Entity<UserCreationToken>().HasKey(x => x.Id);
+            builder.Entity<UserCreationToken>().Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.Entity<UserCreationToken>().Property(x => x.IssuedAt).IsRequired();
+            builder.Entity<UserCreationToken>().Property(x => x.Token).IsRequired();
+            builder.Entity<UserCreationToken>().HasOne(x => x.Issuer).WithMany().HasForeignKey(x => x.IssuerId);
+            builder.Entity<UserCreationToken>().HasOne(x => x.CreatedUser).WithOne().HasForeignKey(typeof(User), nameof(UserCreationToken.CreatedUserId));
+
             // Data seeding
             builder.Entity<Service>().HasData(new Service() { Key = 1, Name = "Steam Server Info", Url = "https://api.steampowered.com/ISteamWebAPIUtil/GetServerInfo/v1/" });
             builder.Entity<Service>().HasData(new Service() { Key = 2, Name = "GitHub API", Url = "https://api.github.com" });
+
+            UserCreationToken seedToken;
+            using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
+            {
+                byte[] idBuf = new byte[4];
+                csp.GetNonZeroBytes(idBuf);
+                byte[] token = new byte[8];
+                csp.GetNonZeroBytes(token);
+
+                seedToken = new UserCreationToken()
+                {
+                    Id = BitConverter.ToInt32(idBuf),
+                    Token = token,
+                    CreatedUserId = null,
+                    IssuerId = null,
+                    IssuedAt = DateTime.UtcNow
+                };
+            }
+            Console.WriteLine(BitConverter.ToString(seedToken.Token).Replace("-", ""));
+
+            builder.Entity<UserCreationToken>().HasData(seedToken);
         }
     }
 }

@@ -15,6 +15,9 @@ namespace StatusAppBackend.Utils
             if(operation.Tags.Any(t => t.Name == "Authentication"))
                 return;
             
+            if(operation.Tags.Any(t => t.Name == "Service"))
+                return;
+            
             var scheme = new OpenApiSecurityScheme()
             {
                 Reference = new OpenApiReference()

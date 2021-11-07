@@ -68,6 +68,7 @@ namespace StatusAppBackend
             });
             services.AddScoped<IServicesService, ServicesService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ISecurityService, SecurityService>();
             services.AddDbContext<StatusAppContext>(options => options.UseNpgsql(Configuration.GetConnectionString("StatusAppContext")));
             services.AddHostedService<FetchServiceInformationService>();

@@ -8,11 +8,11 @@ namespace StatusAppBackend.Services
     public abstract class CronJobService : IHostedService, IDisposable
     {
         private System.Timers.Timer _timer;
-        private readonly int _offset;
+        private readonly double _offset;
 
-        public CronJobService(int offset)
+        public CronJobService(double offset)
         {
-            if(offset <= 0)
+            if (offset <= 0)
                 throw new ArgumentException("Offset has to be greater than 0");
             this._offset = offset;
         }
@@ -21,11 +21,13 @@ namespace StatusAppBackend.Services
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            if (!cancellationToken.IsCancellationRequested)
+                await this.DoWork(cancellationToken);
             // set timer for passed offset
             this._timer = new System.Timers.Timer(this._offset * 1000);
             this._timer.Elapsed += async (sender, args) =>
             {
-                if(!cancellationToken.IsCancellationRequested)
+                if (!cancellationToken.IsCancellationRequested)
                     await this.DoWork(cancellationToken);
             };
 

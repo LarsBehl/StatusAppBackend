@@ -106,7 +106,7 @@ namespace StatusAppBackend.Migrations
                     b.HasIndex("CreatedUserId")
                         .IsUnique();
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("StatusAppBackend.Database.Model.UserCreationToken", b =>
@@ -133,14 +133,14 @@ namespace StatusAppBackend.Migrations
 
                     b.HasIndex("IssuerId");
 
-                    b.ToTable("UserCreationToken");
+                    b.ToTable("UserCreationTokens");
 
                     b.HasData(
                         new
                         {
-                            Id = -1048121302,
-                            IssuedAt = new DateTime(2021, 11, 7, 13, 57, 48, 552, DateTimeKind.Utc).AddTicks(5931),
-                            Token = new byte[] { 218, 11, 250, 5, 220, 57, 248, 48 }
+                            Id = 1461171949,
+                            IssuedAt = new DateTime(2021, 11, 7, 15, 24, 51, 268, DateTimeKind.Utc).AddTicks(3478),
+                            Token = new byte[] { 253, 133, 118, 27, 21, 208, 180, 119 }
                         });
                 });
 

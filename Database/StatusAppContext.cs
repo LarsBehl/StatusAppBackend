@@ -10,6 +10,8 @@ namespace StatusAppBackend.Database
     {
         public DbSet<Service> Services { get; set; }
         public DbSet<ServiceInformation> ServiceInformations { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserCreationToken> UserCreationTokens { get; set; }
 
         public StatusAppContext(DbContextOptions<StatusAppContext> options) : base(options)
         {
@@ -58,10 +60,12 @@ namespace StatusAppBackend.Database
                 csp.GetNonZeroBytes(idBuf);
                 byte[] token = new byte[8];
                 csp.GetNonZeroBytes(token);
+                int id = BitConverter.ToInt32(idBuf);
+                id = id < 0 ? -id : id;
 
                 seedToken = new UserCreationToken()
                 {
-                    Id = BitConverter.ToInt32(idBuf),
+                    Id = id,
                     Token = token,
                     CreatedUserId = null,
                     IssuerId = null,

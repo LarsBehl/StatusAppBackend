@@ -9,23 +9,7 @@ namespace StatusAppBackend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "UserCreationToken",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Token = table.Column<byte[]>(type: "bytea", nullable: false),
-                    IssuedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    IssuerId = table.Column<int>(type: "integer", nullable: true),
-                    CreatedUserId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserCreationToken", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "User",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -37,36 +21,52 @@ namespace StatusAppBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserCreationTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Token = table.Column<byte[]>(type: "bytea", nullable: false),
+                    IssuedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    IssuerId = table.Column<int>(type: "integer", nullable: true),
+                    CreatedUserId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCreationTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_User_UserCreationToken_CreatedUserId",
-                        column: x => x.CreatedUserId,
-                        principalTable: "UserCreationToken",
+                        name: "FK_UserCreationTokens_Users_IssuerId",
+                        column: x => x.IssuerId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
-                table: "UserCreationToken",
+                table: "UserCreationTokens",
                 columns: new[] { "Id", "CreatedUserId", "IssuedAt", "IssuerId", "Token" },
-                values: new object[] { -1048121302, null, new DateTime(2021, 11, 7, 13, 57, 48, 552, DateTimeKind.Utc).AddTicks(5931), null, new byte[] { 218, 11, 250, 5, 220, 57, 248, 48 } });
+                values: new object[] { 1461171949, null, new DateTime(2021, 11, 7, 15, 24, 51, 268, DateTimeKind.Utc).AddTicks(3478), null, new byte[] { 253, 133, 118, 27, 21, 208, 180, 119 } });
 
             migrationBuilder.CreateIndex(
-                name: "IX_User_CreatedUserId",
-                table: "User",
+                name: "IX_UserCreationTokens_IssuerId",
+                table: "UserCreationTokens",
+                column: "IssuerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_CreatedUserId",
+                table: "Users",
                 column: "CreatedUserId",
                 unique: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserCreationToken_IssuerId",
-                table: "UserCreationToken",
-                column: "IssuerId");
-
             migrationBuilder.AddForeignKey(
-                name: "FK_UserCreationToken_User_IssuerId",
-                table: "UserCreationToken",
-                column: "IssuerId",
-                principalTable: "User",
+                name: "FK_Users_UserCreationTokens_CreatedUserId",
+                table: "Users",
+                column: "CreatedUserId",
+                principalTable: "UserCreationTokens",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -74,14 +74,14 @@ namespace StatusAppBackend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_User_UserCreationToken_CreatedUserId",
-                table: "User");
+                name: "FK_UserCreationTokens_Users_IssuerId",
+                table: "UserCreationTokens");
 
             migrationBuilder.DropTable(
-                name: "UserCreationToken");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "UserCreationTokens");
         }
     }
 }

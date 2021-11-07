@@ -80,12 +80,12 @@ namespace StatusAppBackend.Controllers
         public async Task<ActionResult> UpdatePassword([FromRoute] int id, [FromBody] PasswordUpdateDTO passwordUpdate)
         {
             bool success = int.TryParse(this.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId);
-            if(!success)
+            if (!success)
                 throw new BadRequestException();
-            
-            if(userId != id)
+
+            if (userId != id)
                 throw new ForbiddenException();
-            
+
             await this._userService.UpdatePassword(passwordUpdate, id);
 
             return NoContent();
@@ -104,6 +104,19 @@ namespace StatusAppBackend.Controllers
             await this._userService.DeleteUser(id);
 
             return NoContent();
+        }
+
+        /// <summary>
+        /// Creates a token which can be used to create a new user. The token is valid for 7 days
+        /// </summary>
+        /// <response code="201">The token has successfully been created</response>
+        [HttpPost("token")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<TokenDTO>> CreateToken()
+        {
+            int userId = int.Parse(this.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            TokenDTO token = await this._userService.CreateRegistrationToken(userId);
+            return Created(this.Url.RouteUrl(token.Id), token);
         }
     }
 }

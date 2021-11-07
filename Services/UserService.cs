@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using ExceptionMiddleware.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,46 @@ namespace StatusAppBackend.Services
             this._context = context;
             this._logger = logger;
             this._securityService = securityService;
+        }
+
+        public async Task<TokenDTO> CreateRegistrationToken(int issuerId)
+        {
+            User user = await this._context.Users.SingleOrDefaultAsync(u => u.Id == issuerId);
+            // this should never happen, as the issuerId is extracted from the JWT
+            if (user is null)
+                throw new InternalServerErrorException();
+
+            int id;
+            string tokenString;
+            using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
+            {
+                do
+                {
+                    byte[] idBuf = new byte[4];
+                    csp.GetBytes(idBuf);
+                    id = BitConverter.ToInt32(idBuf);
+                } while (await this._context.UserCreationTokens.AnyAsync(t => t.Id == id));
+
+                byte[] tokenBuf = new byte[8];
+                csp.GetNonZeroBytes(tokenBuf);
+
+                tokenString = BitConverter.ToString(tokenBuf).Replace("-", "");
+            }
+
+            id = id < 0 ? -id : id;
+
+            UserCreationToken token = new UserCreationToken()
+            {
+                IssuerId = issuerId,
+                Id = id,
+                Token = tokenString,
+                IssuedAt = DateTime.UtcNow
+            };
+
+            this._context.Add(token);
+            await this._context.SaveChangesAsync();
+
+            return new TokenDTO(id, tokenString, token.IssuedAt.AddDays(7));
         }
 
         public async Task<UserDTO> CreateUser(UserCreationDTO userCreation)

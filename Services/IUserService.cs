@@ -20,5 +20,11 @@ namespace StatusAppBackend.Services
         /// Deletes the given user
         /// </summary>
         Task DeleteUser(int userId);
+
+        /// <summary>
+        /// Creates a registreation token
+        /// </summary>
+        /// <returns>An object representing the newly created token</returns>
+        Task<TokenDTO> CreateRegistrationToken(int issuerId);
     }
 }

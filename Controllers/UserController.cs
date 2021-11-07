@@ -1,5 +1,7 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using ExceptionMiddleware.Exceptions;
 using ExceptionMiddleware.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -75,9 +77,18 @@ namespace StatusAppBackend.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public ActionResult UpdatePassword([FromRoute] int id, [FromBody] PasswordUpdateDTO passwordUpdate)
+        public async Task<ActionResult> UpdatePassword([FromRoute] int id, [FromBody] PasswordUpdateDTO passwordUpdate)
         {
-            throw new NotImplementedException();
+            bool success = int.TryParse(this.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId);
+            if(!success)
+                throw new BadRequestException();
+            
+            if(userId != id)
+                throw new ForbiddenException();
+            
+            await this._userService.UpdatePassword(passwordUpdate, id);
+
+            return NoContent();
         }
 
         /// <summary>
@@ -88,9 +99,11 @@ namespace StatusAppBackend.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public ActionResult DeleteUser([FromRoute] int id)
+        public async Task<ActionResult> DeleteUser([FromRoute] int id)
         {
-            throw new NotImplementedException();
+            await this._userService.DeleteUser(id);
+
+            return NoContent();
         }
     }
 }

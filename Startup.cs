@@ -67,6 +67,8 @@ namespace StatusAppBackend
                 c.OperationFilter<SwaggerAuthConfig>();
             });
             services.AddScoped<IServicesService, ServicesService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<ISecurityService, SecurityService>();
             services.AddDbContext<StatusAppContext>(options => options.UseNpgsql(Configuration.GetConnectionString("StatusAppContext")));
             services.AddHostedService<FetchServiceInformationService>();
             services.AddHealthChecks();

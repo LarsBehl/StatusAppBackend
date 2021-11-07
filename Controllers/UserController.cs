@@ -1,10 +1,12 @@
 using System;
+using System.Threading.Tasks;
 using ExceptionMiddleware.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StatusAppBackend.Controllers.DTOs;
+using StatusAppBackend.Services;
 
 namespace StatusAppBackend.Controllers
 {
@@ -14,6 +16,9 @@ namespace StatusAppBackend.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : ControllerBase
     {
+        private readonly IUserService _userService;
+
+        public UserController(IUserService userService) => this._userService = userService;
 
         /// <summary>
         /// Create a new user for administration
@@ -40,9 +45,10 @@ namespace StatusAppBackend.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
-        public ActionResult<UserDTO> CreateUser([FromBody] UserCreationDTO userCreation)
+        public async Task<ActionResult<UserDTO>> CreateUser([FromBody] UserCreationDTO userCreation)
         {
-            throw new NotImplementedException();
+            UserDTO createdUser = await this._userService.CreateUser(userCreation);
+            return Created(this.Url.RouteUrl(createdUser.Id), createdUser);
         }
 
         /// <summary>

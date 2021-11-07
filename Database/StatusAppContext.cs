@@ -66,14 +66,12 @@ namespace StatusAppBackend.Database
                 seedToken = new UserCreationToken()
                 {
                     Id = id,
-                    Token = token,
+                    Token = BitConverter.ToString(token).Replace("-", ""),
                     CreatedUserId = null,
                     IssuerId = null,
                     IssuedAt = DateTime.UtcNow
                 };
             }
-            Console.WriteLine(BitConverter.ToString(seedToken.Token).Replace("-", ""));
-
             builder.Entity<UserCreationToken>().HasData(seedToken);
         }
     }

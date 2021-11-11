@@ -38,24 +38,24 @@ namespace StatusAppBackend.Services
                 if (dbContext.UserCreationTokens.Count() <= 0)
                 {
                     UserCreationToken seedToken;
-                    using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
+
+                    string tokenString;
+                    using (RandomNumberGenerator csp = RandomNumberGenerator.Create())
                     {
-                        byte[] idBuf = new byte[4];
-                        csp.GetBytes(idBuf);
                         byte[] token = new byte[8];
                         csp.GetNonZeroBytes(token);
-                        int id = BitConverter.ToInt32(idBuf);
-                        id = id < 0 ? -id : id;
-
-                        seedToken = new UserCreationToken()
-                        {
-                            Id = id,
-                            Token = BitConverter.ToString(token).Replace("-", ""),
-                            CreatedUserId = null,
-                            IssuerId = null,
-                            IssuedAt = DateTime.UtcNow
-                        };
+                        tokenString = BitConverter.ToString(token).Replace("-", "");
                     }
+
+                    int id = RandomNumberGenerator.GetInt32(0, Int32.MaxValue);
+                    seedToken = new UserCreationToken()
+                    {
+                        Id = id,
+                        Token = tokenString,
+                        CreatedUserId = null,
+                        IssuerId = null,
+                        IssuedAt = DateTime.UtcNow
+                    };
                     await dbContext.UserCreationTokens.AddAsync(seedToken);
 
                     this._logger.LogInformation($"Added initial token {seedToken.Token}");

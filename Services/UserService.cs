@@ -44,10 +44,14 @@ namespace StatusAppBackend.Services
                     id = BitConverter.ToInt32(idBuf);
                 } while (await this._context.UserCreationTokens.AnyAsync(t => t.Id == id));
 
-                byte[] tokenBuf = new byte[8];
-                csp.GetNonZeroBytes(tokenBuf);
+                // prevent duplicate tokens
+                do
+                {
+                    byte[] tokenBuf = new byte[8];
+                    csp.GetNonZeroBytes(tokenBuf);
 
-                tokenString = BitConverter.ToString(tokenBuf).Replace("-", "");
+                    tokenString = BitConverter.ToString(tokenBuf).Replace("-", "");
+                } while (await this._context.UserCreationTokens.AnyAsync(t => t.Token == tokenString));
             }
 
             id = id < 0 ? -id : id;

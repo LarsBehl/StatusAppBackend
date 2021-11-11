@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using StatusAppBackend.Database.Model;
@@ -52,27 +51,6 @@ namespace StatusAppBackend.Database
             // Data seeding
             builder.Entity<Service>().HasData(new Service() { Key = 1, Name = "Steam Server Info", Url = "https://api.steampowered.com/ISteamWebAPIUtil/GetServerInfo/v1/" });
             builder.Entity<Service>().HasData(new Service() { Key = 2, Name = "GitHub API", Url = "https://api.github.com" });
-
-            UserCreationToken seedToken;
-            using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
-            {
-                byte[] idBuf = new byte[4];
-                csp.GetNonZeroBytes(idBuf);
-                byte[] token = new byte[8];
-                csp.GetNonZeroBytes(token);
-                int id = BitConverter.ToInt32(idBuf);
-                id = id < 0 ? -id : id;
-
-                seedToken = new UserCreationToken()
-                {
-                    Id = id,
-                    Token = BitConverter.ToString(token).Replace("-", ""),
-                    CreatedUserId = null,
-                    IssuerId = null,
-                    IssuedAt = DateTime.UtcNow
-                };
-            }
-            builder.Entity<UserCreationToken>().HasData(seedToken);
         }
     }
 }

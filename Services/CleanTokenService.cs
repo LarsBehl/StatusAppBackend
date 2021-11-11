@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,11 +30,38 @@ namespace StatusAppBackend.Services
 
         private async Task CleanTokenTable()
         {
-            using(IServiceScope scope = this._scopeFactory.CreateScope())
+            using (IServiceScope scope = this._scopeFactory.CreateScope())
             {
                 StatusAppContext dbContext = scope.ServiceProvider.GetRequiredService<StatusAppContext>();
 
-                IEnumerable<UserCreationToken> expiredTokens = dbContext.UserCreationTokens.Where(uct => uct.IssuedAt + TimeSpan.FromDays(7) < DateTime.UtcNow);
+                // check if there is any token in the db
+                if (dbContext.UserCreationTokens.Count() <= 0)
+                {
+                    UserCreationToken seedToken;
+                    using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
+                    {
+                        byte[] idBuf = new byte[4];
+                        csp.GetBytes(idBuf);
+                        byte[] token = new byte[8];
+                        csp.GetNonZeroBytes(token);
+                        int id = BitConverter.ToInt32(idBuf);
+                        id = id < 0 ? -id : id;
+
+                        seedToken = new UserCreationToken()
+                        {
+                            Id = id,
+                            Token = BitConverter.ToString(token).Replace("-", ""),
+                            CreatedUserId = null,
+                            IssuerId = null,
+                            IssuedAt = DateTime.UtcNow
+                        };
+                    }
+                    await dbContext.UserCreationTokens.AddAsync(seedToken);
+
+                    this._logger.LogInformation($"Added initial token {seedToken.Token}");
+                }
+
+                IEnumerable<UserCreationToken> expiredTokens = dbContext.UserCreationTokens.Where(uct => uct.IssuedAt + TimeSpan.FromDays(7) < DateTime.UtcNow && uct.CreatedUserId == null && uct.IssuerId != null);
                 dbContext.RemoveRange(expiredTokens);
                 await dbContext.SaveChangesAsync();
             }

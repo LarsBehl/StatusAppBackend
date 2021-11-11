@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StatusAppBackend.Database;
@@ -9,9 +10,10 @@ using StatusAppBackend.Database;
 namespace StatusAppBackend.Migrations
 {
     [DbContext(typeof(StatusAppContext))]
-    partial class StatusAppContextModelSnapshot : ModelSnapshot
+    [Migration("20211107152451_UserCreation")]
+    partial class UserCreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,9 +127,9 @@ namespace StatusAppBackend.Migrations
                     b.Property<int?>("IssuerId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Token")
+                    b.Property<byte[]>("Token")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("bytea");
 
                     b.HasKey("Id");
 
@@ -138,9 +140,9 @@ namespace StatusAppBackend.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1315379924,
-                            IssuedAt = new DateTime(2021, 11, 7, 16, 34, 27, 821, DateTimeKind.Utc).AddTicks(6467),
-                            Token = "AE2326D24A91A0BD"
+                            Id = 1461171949,
+                            IssuedAt = new DateTime(2021, 11, 7, 15, 24, 51, 268, DateTimeKind.Utc).AddTicks(3478),
+                            Token = new byte[] { 253, 133, 118, 27, 21, 208, 180, 119 }
                         });
                 });
 

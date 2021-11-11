@@ -9,7 +9,7 @@ namespace StatusAppBackend.Services
         public void HashPassword(string password, out byte[] hash, out byte[] salt)
         {
             salt = new byte[32];
-            using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
+            using (RandomNumberGenerator csp = RandomNumberGenerator.Create())
             {
                 csp.GetBytes(salt);
             }

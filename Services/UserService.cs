@@ -35,20 +35,18 @@ namespace StatusAppBackend.Services
 
             int id;
             string tokenString;
-            using (RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider())
+            do
             {
-                do
-                {
-                    byte[] idBuf = new byte[4];
-                    csp.GetBytes(idBuf);
-                    id = BitConverter.ToInt32(idBuf);
-                } while (await this._context.UserCreationTokens.AnyAsync(t => t.Id == id));
+                id = RandomNumberGenerator.GetInt32(0, Int32.MaxValue);
+            } while (await this._context.UserCreationTokens.AnyAsync(t => t.Id == id));
 
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
                 // prevent duplicate tokens
                 do
                 {
                     byte[] tokenBuf = new byte[8];
-                    csp.GetNonZeroBytes(tokenBuf);
+                    rng.GetNonZeroBytes(tokenBuf);
 
                     tokenString = BitConverter.ToString(tokenBuf).Replace("-", "");
                 } while (await this._context.UserCreationTokens.AnyAsync(t => t.Token == tokenString));

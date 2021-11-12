@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using StatusAppBackend.Controllers.DTOs;
 using StatusAppBackend.Database;
 using StatusAppBackend.Database.Model;
+using StatusAppBackend.Exceptions;
 
 namespace StatusAppBackend.Services
 {
@@ -21,6 +22,51 @@ namespace StatusAppBackend.Services
             this._dbContext = dbContext;
             this._httpClient = new HttpClient();
             this._httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($".NET{Environment.Version}");
+        }
+
+        public async Task<ServiceDTO> CreateServiceAsync(ServiceDTO service)
+        {
+            if(string.IsNullOrWhiteSpace(service.Name))
+                throw new BadRequestException($"Invalid name {service.Name}");
+            
+            if(string.IsNullOrWhiteSpace(service.Url))
+                throw new BadRequestException($"Invlaid service url");
+
+            if(await this._dbContext.Services.AnyAsync(s => s.Name == service.Name))
+                throw new ConflictException($"Service {service.Name} already exists");
+            
+            if(await this._dbContext.Services.AnyAsync(s => s.Url == service.Url))
+                throw new ConflictException($"Service with given url already exists");
+            
+            Service s = new Service()
+            {
+                Url = service.Url,
+                Name = service.Name
+            };
+
+            await this._dbContext.AddAsync(s);
+            await this._dbContext.SaveChangesAsync();
+
+            return new ServiceDTO(s);
+        }
+
+        public async Task DeleteServiceAsync(int serviceId)
+        {
+            Service service = await this._dbContext.Services.SingleOrDefaultAsync(s => s.Key == serviceId);
+            if(service is null)
+                throw new NotFoundException($"Unknown service id {serviceId}");
+
+            this._dbContext.Remove(service);
+            await this._dbContext.SaveChangesAsync();
+        }
+
+        public async Task<ServiceDTO> GetServiceAsync(int serviceId)
+        {
+            Service service = await this._dbContext.Services.SingleOrDefaultAsync(s => s.Key == serviceId);
+            if(service is null)
+                throw new NotFoundException($"Unknown service id {serviceId}");
+
+            return new ServiceDTO(service);
         }
 
         public async Task<IEnumerable<ServiceInformationDTO>> GetServiceInformationAsync()
@@ -42,7 +88,7 @@ namespace StatusAppBackend.Services
             return new ServiceInformationDTO(service);
         }
 
-        public IEnumerable<ServiceDTO> GetServices() => this._dbContext.Services.ToList().ConvertAll<ServiceDTO>(x => new ServiceDTO(x));
+        public async Task<IEnumerable<ServiceDTO>> GetServicesAsync() => (await this._dbContext.Services.ToListAsync()).ConvertAll<ServiceDTO>(x => new ServiceDTO(x));
 
         public async Task<TimeSeriesDTO> GetServiceTimeSeriesAsync(int id)
         {
@@ -56,6 +102,31 @@ namespace StatusAppBackend.Services
                                                          .OrderBy(s => s.TimeRequested)
                                                          .ToListAsync()
             );
+        }
+
+        public async Task<ServiceDTO> UpdateServiceAsync(ServiceDTO service, int id)
+        {
+            if(string.IsNullOrWhiteSpace(service.Name))
+                throw new BadRequestException("Invalid service name");
+            
+            if(string.IsNullOrWhiteSpace(service.Url))
+                throw new BadRequestException("Invalid service url");
+            
+            if(await this._dbContext.Services.AnyAsync(s => s.Name == service.Name && s.Key != id))
+                throw new ConflictException($"Service {service.Name} already exists");
+            
+            if(await this._dbContext.Services.AnyAsync(s => s.Url == service.Url && s.Key != id))
+                throw new ConflictException($"Serivce with given url already exists");
+
+            Service s = await this._dbContext.Services.SingleOrDefaultAsync(s => s.Key == id);
+            if(s is null)
+                throw new NotFoundException($"Unknown service id {id}");
+
+            s.Name = service.Name;
+            s.Url = service.Url;
+            await this._dbContext.SaveChangesAsync();
+
+            return new ServiceDTO(s);
         }
 
         private async Task<ServiceInformation> GetServiceInformationFromDbAsync(int id)

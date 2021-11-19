@@ -41,13 +41,13 @@ namespace StatusAppBackend.Services
         /// Creates a <see cref="Service" /> which will be queried by the cron service automatically
         /// </summary>
         /// <returns>A <see cref="ServiceDTO" /> representing the created object</returns>
-        Task<ServiceDTO> CreateServiceAsync(ServiceDTO service);
+        Task<ServiceDTO> CreateServiceAsync(ServiceConfigurationDTO service);
 
         /// <summary>
         /// Update the <see cref="Service" /> with the given id
         /// </summary>
         /// <returns>The updated service</returns>
-        Task<ServiceDTO> UpdateServiceAsync(ServiceDTO service, int id);
+        Task<ServiceDTO> UpdateServiceAsync(ServiceConfigurationDTO service, int id);
 
         /// <summary>
         /// Deletes the service with the given id

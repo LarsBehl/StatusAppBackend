@@ -76,7 +76,7 @@ namespace StatusAppBackend.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ServiceDTO>> CreateService([FromBody] ServiceDTO service)
+        public async Task<ActionResult<ServiceDTO>> CreateService([FromBody] ServiceConfigurationDTO service)
         {
             ServiceDTO createdService = await this._servicesService.CreateServiceAsync(service);
             return Created(this.Url.RouteUrl(createdService.Id), createdService);
@@ -107,7 +107,7 @@ namespace StatusAppBackend.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ServiceDTO>> UpdateService([FromBody] ServiceDTO service, [FromRoute] int id)
+        public async Task<ActionResult<ServiceDTO>> UpdateService([FromBody] ServiceConfigurationDTO service, [FromRoute] int id)
         {
             return Ok(await this._servicesService.UpdateServiceAsync(service, id));
         }

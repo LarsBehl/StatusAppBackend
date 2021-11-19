@@ -24,7 +24,7 @@ namespace StatusAppBackend.Services
             this._httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($".NET{Environment.Version}");
         }
 
-        public async Task<ServiceDTO> CreateServiceAsync(ServiceDTO service)
+        public async Task<ServiceDTO> CreateServiceAsync(ServiceConfigurationDTO service)
         {
             if(string.IsNullOrWhiteSpace(service.Name))
                 throw new BadRequestException($"Invalid name {service.Name}");
@@ -104,7 +104,7 @@ namespace StatusAppBackend.Services
             );
         }
 
-        public async Task<ServiceDTO> UpdateServiceAsync(ServiceDTO service, int id)
+        public async Task<ServiceDTO> UpdateServiceAsync(ServiceConfigurationDTO service, int id)
         {
             if(string.IsNullOrWhiteSpace(service.Name))
                 throw new BadRequestException("Invalid service name");

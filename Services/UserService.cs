@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using ExceptionMiddleware.Exceptions;
@@ -129,6 +130,8 @@ namespace StatusAppBackend.Services
             this._context.Users.Remove(user);
             await this._context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync() => (await this._context.Users.ToListAsync()).ConvertAll<UserDTO>(x => new UserDTO(x));
 
         public async Task UpdatePassword(PasswordUpdateDTO passwordUpdate, int userId)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ExceptionMiddleware.Exceptions;
@@ -51,6 +52,18 @@ namespace StatusAppBackend.Controllers
         {
             UserDTO createdUser = await this._userService.CreateUser(userCreation);
             return Created(this.Url.RouteUrl(createdUser.Id), createdUser);
+        }
+
+        /// <summary>
+        /// Get all registered users
+        /// </summary>
+        /// <returns>A list of all registered users</returns>
+        /// <response code="200">Returns a list of all registered users</response>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
+        {
+            return Ok(await this._userService.GetAllUsersAsync());
         }
 
         /// <summary>

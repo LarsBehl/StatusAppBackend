@@ -45,8 +45,8 @@ namespace StatusAppBackend.Database
             builder.Entity<UserCreationToken>().Property(x => x.Id).ValueGeneratedOnAdd();
             builder.Entity<UserCreationToken>().Property(x => x.IssuedAt).IsRequired();
             builder.Entity<UserCreationToken>().Property(x => x.Token).IsRequired();
-            builder.Entity<UserCreationToken>().HasOne(x => x.Issuer).WithMany().HasForeignKey(x => x.IssuerId);
-            builder.Entity<UserCreationToken>().HasOne(x => x.CreatedUser).WithOne().HasForeignKey(typeof(User), nameof(UserCreationToken.CreatedUserId));
+            builder.Entity<UserCreationToken>().HasOne(x => x.Issuer).WithMany().HasForeignKey(x => x.IssuerId).OnDelete(DeleteBehavior.SetNull);
+            builder.Entity<UserCreationToken>().HasOne(x => x.CreatedUser).WithOne().HasForeignKey(typeof(User), nameof(UserCreationToken.CreatedUserId)).OnDelete(DeleteBehavior.Cascade);
 
             // Data seeding
             builder.Entity<Service>().HasData(new Service() { Key = 1, Name = "Steam Server Info", Url = "https://api.steampowered.com/ISteamWebAPIUtil/GetServerInfo/v1/" });

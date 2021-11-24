@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using StatusAppBackend.Controllers.DTOs;
 
@@ -10,6 +11,8 @@ namespace StatusAppBackend.Services
         /// </summary>
         /// <returns>The newly created user</returns>
         Task<UserDTO> CreateUser(UserCreationDTO userCreation);
+
+        Task<IEnumerable<UserDTO>> GetAllUsersAsync();
         
         /// <summary>
         /// Updates the password for the given user

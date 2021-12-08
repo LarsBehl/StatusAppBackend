@@ -99,7 +99,7 @@ namespace StatusAppBackend.Services
             return new TimeSeriesDTO(
                 service,
                 await this._dbContext.ServiceInformations.Where(s => s.ServiceKey == id)
-                                                         .OrderBy(s => s.TimeRequested)
+                                                         .OrderByDescending(s => s.TimeRequested)
                                                          .ToListAsync()
             );
         }
